@@ -9,7 +9,7 @@ before making a change.
 
 1. Create a pull request early in development processes with a checkbox list of
    features/changes you plan to make along with a description of what you intend
-   to do.  Append (WIP) for "work in progress" to the title of this pull request
+   to do.  Prepend (WIP:) for "work in progress" to the title of this pull request
    until you are ready for review and merging.
 2. Update README.rst and the Sphinx documentation with detains of any changes to
    the interface, this includes new environment variables, exposed ports, and
