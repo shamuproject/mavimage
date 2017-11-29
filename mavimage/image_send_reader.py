@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Thu Nov 16 15:52:47 2017
+Created on Tue Nov 28 18:27:23 2017
 
 @author: laurenmcintire
 """
+
 # based on: https://gist.github.com/vo/9331349
 
-# mavlink reader. Read in mavlink message
+# mavlink reader. Read in mavlink message on UAV
 import sys, os
 from optparse import OptionParser
 # where is mavlink?
@@ -19,10 +20,11 @@ def handle_heartbeat(msg):
     is_armed = msg.base_mode & mavutil.mavlink.MAV_MODE_SAFETY_ARMED
     is_enabled = msg.base_mode & mavutil.mavlink.MAV_MODE_FLAG_GUIDED_ENABLED
     
-def handle_image(msg):
+def send_image(msg):
     # which channel?
     # from command line
     channel = channel_input
+    return 
     
 def read_loop(m):
     #grab message
@@ -31,17 +33,14 @@ def read_loop(m):
         if not msg:
             return
     msg_type = msg.get_type()
-    if msg_type == "BAD_DATA":
-        # how to handle this?
-        print("BAD DATA")
-    elif msg_type == "HEARTBEAT":
+    if msg_type == "HEARTBEAT":
         handle_heartbeat(msg)
     elif msg_type == "DATA_TRANSMISSION_HANDSHAKE":
-        handle_image(msg)
+        send_image(msg)
         
 def main():
     #command line options
-    parser = OptionParser("readdata.py [options")
+    parser = OptionParser("readdata.py [options]")
     parser.add_option("--baudrate", dest="baudrate",type='int',
                       help="master port baud rate", default=115200)
     parser.add_option("--device", dest="device", default=None, help="serial device")
@@ -59,8 +58,8 @@ def main():
     master = mavutil.mavlink_connection(opts.device, baud=opts.baudrate)
     
     #wait for heartbeat to get system ID
-    master.wait_heartbeat()
-    
+    master.wait_gps_fix()
+    #send response
     master.mav.request_data_stream_send(master.target_system, master.target_component, 
                                         mavutil.mavlink.MAV_DATA_STREAM_ALL, opts.rate, 1)
     # begin read link

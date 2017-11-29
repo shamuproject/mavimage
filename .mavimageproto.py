@@ -34,5 +34,8 @@ MAVLINK_DATA_STREAM_IMG_WEBP #enum
 # each new image has new DATA_TRANSMISSION_HANDSHAKE. Sequence number for each starts with 0
 # wait for stop in DATA_TRANSMISSION_HANDSHAKE with frequency set to 0
 # send back ACK packet with same data
-
+# CAMERA_IMAGE_CAPTURED
+# CAMERA_INFORMATION
+# ENCAPSULATED_DATA
+# GLOBAL_POSITION_INT
 
