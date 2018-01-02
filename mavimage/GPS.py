@@ -2,6 +2,7 @@
 from dronekit import connect
 '''
 GPS class. Responsible for retrieving GPS data given connection and returning GPS data including lat, long, and time
+January 2, 2018
 '''
 class GPS:
 
