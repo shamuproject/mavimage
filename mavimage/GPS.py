@@ -1,5 +1,6 @@
 
 from dronekit import connect
+import datetime as d
 '''
 GPS class. Responsible for retrieving GPS data given connection and returning GPS data including lat, long, and time
 January 2, 2018
@@ -21,7 +22,7 @@ class GPS:
         vehicle.wait_ready('autopilot_version')
         # returns the latitude and longitude of the UAV
         message = vehicle.location.global_frame
-        time = vehicle.time()
+        time = d.datetime
         # need a way to find timestamp
         #####
         return message, time
@@ -29,7 +30,7 @@ class GPS:
     def record(self):
         # return the gps record
         link = self.register_handlers()
-        gps = self.global_position_int_handler(link)
+        gps, time = self.global_position_int_handler(link)
         return gps
 
 
