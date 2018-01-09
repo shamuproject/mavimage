@@ -17,8 +17,8 @@ class GPS:
         # return connection
         return self.connection
 
-    def global_position_int_handler(self, mavlink):
-        # mavlink:MAVLinkConnection
+    def global_position_int_handler(self, mavlink, message):
+        # mavlink:MAVLinkConnection, message: MAVLink_global_position_int_message
         # find gps location and time of UAV
         connection_string = mavlink
         vehicle = connect(connection_string, wait_ready=True)

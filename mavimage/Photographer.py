@@ -9,6 +9,7 @@ class Photographer:
     def __init__(self, camera, image_sender, image_writer=None):
         # camera: PiCamera, image_sender:ImageSender, image_writer:ImageWriter
         self.image_sender = image_sender
+        self.image_writer = image_writer
         self.camera = camera
 
     def register_handlers(self, mavlink):
