@@ -9,9 +9,6 @@ Attributes:
 
 class ImageReceiver:
 
-    def __init__(self, _mavlink, _image, _received_chunks):
-        # mavlink: MavLinkConnection, image: ChunkedBytes, received_chunks: int
-
     def receive(self, mavlink, image):
         # mavlink: MavLinkConnection, image:Image
 

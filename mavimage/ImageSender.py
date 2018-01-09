@@ -9,9 +9,6 @@ Attributes:
 
 class ImageSender:
 
-    def __init__(self, _mavlink, _image, _acknowledged_chunks):
-        # mavlink:MavLinkConnection, image: ChunkedBytes, acknowledged_chunks:bool
-
     def send(self, mavlink, image):
         # mavlink:MavLinkConnection, image:Image
 
