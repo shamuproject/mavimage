@@ -1,11 +1,12 @@
-import picamera
+import RPiCamera
+import WebCamera
 
 '''
 Camera class. Capture image
 Attributes: width, height, gps:GPS
 '''
 
-class Camera:
+class Camera(RPiCamera, WebCamera):
 
     def __init__(self, width, height, gps):
         # gps:GPS
