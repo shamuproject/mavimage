@@ -1,4 +1,3 @@
-import MavtableSequence
 '''
 ChunkedBytes class
 Attributes:
