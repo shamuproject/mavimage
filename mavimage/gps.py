@@ -1,6 +1,4 @@
-
-from dronekit import connect
-import datetime as d
+from datetime import datetime, timedelta
 import MavLinkConnection
 import pymavlink
 '''
@@ -12,21 +10,21 @@ class GPS:
 
     def __init__(self, mavlink):
         # mavlink:MAVLinkConnection
-        # establish connection attribute
-        self.connection = mavlink
+        pass
 
-    def register_handlers(self):
-        mavconnection = MavLinkConnection
-        message = pymavlink.MAVLinkMessage
-        mavconnection.push_handler(self.global_position_int_handler(mavconnection, message))
+    def register_handlers(self, mavlink):
+        mavlink.push_handler('GLOBAL_POSITION_INT', self.global_position_int_handler)
 
     def global_position_int_handler(self, mavlink, message):
-        data = (message.raw_items())
-        return data
+        self.latitude = float(message.lat)
+        self.longitude = float(message.lon)
+        self.altitude = float(message.alt)
+        # find absolute time
+        self.time = datetime(message.time_boot_ms) + timedelta(message.time_boot_ms)
 
     def record(self):
         # return the gps record
-        data = self.global_position_int_handler(self.connection)
-        return data
+        pass
+
 
 
