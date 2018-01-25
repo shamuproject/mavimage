@@ -2,6 +2,7 @@
 from dronekit import connect
 import datetime as d
 import MavLinkConnection
+import pymavlink
 '''
 GPS class. Responsible for retrieving GPS data given connection and returning GPS data including lat, long, and time
 January 2, 2018
@@ -15,7 +16,9 @@ class GPS:
         self.connection = mavlink
 
     def register_handlers(self):
-        MavLinkConnection.push_handler(self.global_position_int_handler(self.connection, message))
+        mavconnection = MavLinkConnection
+        message = pymavlink.MAVLinkMessage
+        mavconnection.push_handler(self.global_position_int_handler(mavconnection, message))
 
     def global_position_int_handler(self, mavlink, message):
         data = (message.raw_items())
