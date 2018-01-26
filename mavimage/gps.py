@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
-import MavLinkConnection
-import pymavlink
+# import MavLinkConnection
+# import pymavlink
 '''
 GPS class. Responsible for retrieving GPS data given connection and returning GPS data including lat, long, and time
 January 2, 2018
@@ -10,7 +10,7 @@ class GPS:
 
     def __init__(self, mavlink):
         # mavlink:MAVLinkConnection
-        pass
+        self.connection = mavlink
 
     def register_handlers(self, mavlink):
         mavlink.push_handler('GLOBAL_POSITION_INT', self.global_position_int_handler)
@@ -23,8 +23,11 @@ class GPS:
         self.time = datetime(message.time_boot_ms) + timedelta(message.time_boot_ms)
 
     def record(self):
-        # return the gps record
-        pass
+        time = self.time
+        lat = self.latitude
+        lon = self.longitude
+        alt = self.altitude
+        return time, lat, lon, alt
 
 
 
