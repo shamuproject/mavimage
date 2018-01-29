@@ -10,7 +10,7 @@ class GPS:
 
     def __init__(self, mavlink):
         # mavlink:MAVLinkConnection
-        self.connection = mavlink
+        self.register_handlers(mavlink)
 
     def register_handlers(self, mavlink):
         mavlink.push_handler('GLOBAL_POSITION_INT', self.global_position_int_handler)
