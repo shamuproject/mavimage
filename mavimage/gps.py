@@ -16,18 +16,19 @@ class GPS:
         mavlink.push_handler('GLOBAL_POSITION_INT', self.global_position_int_handler)
 
     def global_position_int_handler(self, mavlink, message):
-        self.latitude = float(message.lat)
-        self.longitude = float(message.lon)
-        self.altitude = float(message.alt)
+        self.lat = float(message.lat)
+        self.lon = float(message.lon)
+        self.alt = float(message.alt)
         # find absolute time
-        self.time = datetime(message.time_boot_ms) + timedelta(message.time_boot_ms)
+        self.time = datetime.now()
+        self.record()
 
     def record(self):
         time = self.time
-        lat = self.latitude
-        lon = self.longitude
-        alt = self.altitude
-        return time, lat, lon, alt
+        latitude = self.lat
+        longitude = self.long
+        altitude = self.alt
+        return time, latitude, longitude, altitude
 
 
 
