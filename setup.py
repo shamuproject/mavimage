@@ -13,10 +13,10 @@ NAME = 'mavimage'
 DESCRIPTION = 'Send and receive images over MAVLink.'
 URL = 'https://github.com/shamuproject/mavimage'
 # EMAIL = 'me@example.com'
-AUTHOR = 'CETI Foundation'
+AUTHOR = 'Lauren McIntire'
 
 # What packages are required for this module to be executed?
-REQUIRED = []
+REQUIRED = ['Pillow']
 
 here = os.path.abspath(os.path.dirname(__file__))
 
@@ -50,14 +50,11 @@ setup(
         # Full list: https://pypi.python.org/pypi?%3Aaction=list_classifiers
         'License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.6',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: Implementation :: CPython',
-        'Programming Language :: Python :: Implementation :: PyPy'
     ],
 )
