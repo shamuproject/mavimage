@@ -3,19 +3,21 @@ from datetime import datetime
 # import pymavlink
 '''
 GPS class. Responsible for retrieving GPS data given connection and returning GPS data including lat, long, and time
-January 2, 2018
 Attributes: mav_connection:MAVLinkConnection
 '''
 class GPS:
 
     def __init__(self, mavlink):
-        # mavlink:MAVLinkConnection
+        ''' mavlink:MAVLinkConnection '''
         self.register_handlers(mavlink)
 
     def register_handlers(self, mavlink):
+        '''Call push handler in mavlink with request for GLOBAL_POSITION_INT message'''
         mavlink.push_handler('GLOBAL_POSITION_INT', self.global_position_int_handler)
 
     def global_position_int_handler(self, mavlink, message):
+        '''store message attributes'''
+        '''mavlink:MAVLinkConnection, message:GLOBAL_POSITION_INT'''
         self.lat = float(message.lat)
         self.lon = float(message.lon)
         self.alt = float(message.alt)
@@ -24,6 +26,7 @@ class GPS:
         self.record()
 
     def record(self):
+        '''return time, latitude, longitude, and altitude'''
         time = self.time
         latitude = self.lat
         longitude = self.lon
