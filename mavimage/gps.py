@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 # import MavLinkConnection
 # import pymavlink
 '''
@@ -26,7 +26,7 @@ class GPS:
     def record(self):
         time = self.time
         latitude = self.lat
-        longitude = self.long
+        longitude = self.lon
         altitude = self.alt
         return time, latitude, longitude, altitude
 
