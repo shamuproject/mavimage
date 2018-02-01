@@ -1,19 +1,20 @@
 from abc import ABCMeta
 from abc import abstractmethod
 
-'''
+"""
 Camera class. Capture image
-Attributes: width, height, gps:GPS
-'''
+Attributes: gps:GPS
+"""
 
 class Camera(object, metaclass=ABCMeta):
 
     def __init__(self, gps):
-        # gps:GPS
+        """store gps:GPS"""
         self._gps = gps
+        super().__init__()
 
     @abstractmethod
     def take_picture(self):
-        # capture image
+        """abstract method to capture image"""
         pass
 
