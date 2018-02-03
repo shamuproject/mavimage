@@ -36,10 +36,10 @@ class Image:
 
 def gps_to_exif(self, gps_record):
     """gps_record: GPSRecord. Turn GPS record to exif"""
-    dict = dump(gps_record)
+    dict = piexif.dump(gps_record)
     return dict
 
 def exif_to_gps(self, exif):
     """"exif: dict. Turn exif to GPS record"""
-    GPSRecord = load(exif)
+    GPSRecord = piexif.load(exif)
     return GPSRecord
