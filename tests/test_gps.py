@@ -5,8 +5,8 @@ from pytest_mock import mocker
 
 class MockMessage:
     def __init__(self):
-        self.lat = 1.0
-        self.lon = 1.0
+        self.lat = 10000000.0
+        self.lon = 10000000.0
         self.alt = 1.0
 
 class MockMav:
