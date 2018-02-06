@@ -1,6 +1,8 @@
-from PIL import Image, ExifTags
+import PIL.Image
 import piexif
 import io
+import math
+
 """
 Image class.
 Attributes:
@@ -8,12 +10,13 @@ Attributes:
     gps:GPSRecord
 """
 
+
 class Image:
 
     def __init__(self, image=None, gps=None):
         """image: PIL.Image, gps:GPSRecord"""
-        self.image = image
-        self.gps = gps
+        self._image = image
+        self._gps = gps
 
     @classmethod
     def from_bytes(image_bytes):
@@ -21,36 +24,67 @@ class Image:
         """Turn into BytesIO"""
         stream = io.BytesIO(image_bytes)
         """open the stream """
-        image = Image.open(stream)
+        image = PIL.Image.open(stream)
         """Extract GPS data image_bytes and convert it to GPSRecord"""
-        gps_bytes = piexif.load(image.info["exif"])
-        gps = exif_to_gps(gps_bytes)
+        gps = exif_to_gps(image.info['exif'])
         """Transform into image of format with exif data"""
         # webp = Image.Image.frombytes(image)
-        wepb = image.save(file, "WEBP", exif=gps)
+        # wepb = image.save(file, 'WebP', exif=gps)
 
-    def to_bytes(self):
-        """construct image to bytes from format (webp, jpeg). bytes string"""
+    def to_bytes(self, given_format):
+        """construct image to bytes from self.image (PIL.Image). bytes string. Save as BytesIO object"""
         """Create exif from given GPS record"""
-        gps_record = gps_to_exif(self.gps)
-        """open image and convert into bytes"""
-        with open(self.image) as image_stream:
-            f = image_stream.read()
-            b = bytearray(f)
+        """open image and convert into bytesIO"""
+        output = io.BytesIO()
+        self.save(output, given_format)
         """Attach exif data"""
-        piexif.insert(gps_record, b)
-        return b
 
-    def save(self, fp):
-        """save to fp pointer(name(string) or open file object(BytesIO))"""
-        Image.Image.save(fp, format='WEBP', paramters=self.gps)
+    def save(self, fp, format):
+        """open file object(BytesIO))"""
+        gps_bytes = gps_to_exif(self._gps)
+        with io.BytesIO() as inputIO:
+            self._image.save(inputIO, format)
+            inputIO.seek(0)
+            byte_image = inputIO.read()
+        piexif.insert(gps_bytes, byte_image, fp)
+        self._image.save(fp, format)
 
-def gps_to_exif(self, gps_record):
+
+def gps_to_exif(gps_record):
     """gps_record: GPSRecord. Turn GPS record to exif"""
-    dict_record = piexif.dump(gps_record)
-    return dict_record
+    gps_dict = {
+        piexif.GPSIFD.GPSLongitudeRef,
+        piexif.GPSIFD.GPSLongitude,
+        piexif.GPSIFD.GPSLatitudeRef,
+        piexif.GPSIFD.GPSLatitude,
+        piexif.GPSIFD.GPSAltitudeRef,
+        piexif.GPSIFD.GPSAltitude,
+        piexif.GPSIFD.GPSTimeStamp,
+        piexif.GPSIFD.GPSDateStamp,
+        piexif.GPSIFD.GPSMapDatum
+    }
+    gps_dict[piexif.GPSIFD.GPSLongitudeRef] = b'E' if gps_record.longitude >= 0 else b'W'
+    gps_dict[piexif.GPSIFD.GPSLongitude] = (
+        tuple([float(x).as_integer_ratio() for x in deg2dms(gps_record.longitude)]))
+    gps_dict[piexif.GPSIFD.GPSLatitudeRef] = b'N' if gps_record.latitude >= 0 else b'S'
+    gps_dict[piexif.GPSIFD.GPSLatitude] = (
+        tuple([float(x).as_integer_ratio() for x in deg2dms(gps_record.latitude)]))
+    gps_dict[piexif.GPSIFD.GPSAltitudeRef] = 0 if gps_record.altitude >= 0 else 1
+    gps_dict[piexif.GPSIFD.GPSAltitude] = abs(gps_record.altitude)
+    gps_dict[piexif.GPSIFD.GPSMapDatum] = b'WGS-84'
+    gps_dict[piexif.GPSIFD.GPSTimeStamp] = tuple(float(x).as_integer_ratio() for x in [gps_record.time.hour, gps_record.time.minute, gps_record.time.second])
+    gps_dict[piexif.GPSIFD.GPSDateStamp] = gps_record.time.strftime('%Y:%m:%d')
+    return gps_dict
 
-def exif_to_gps(self, exif):
+
+def exif_to_gps(exif):
     """"exif: dict. Turn exif to GPS record"""
     gps_record = piexif.load(exif)
     return gps_record
+
+
+def deg2dms(degrees):
+    deg = int(abs(degrees))
+    minutes = int((degrees-deg)*60)
+    sec = math.floor((((degrees - deg)*60)-minutes)*60)
+    return deg, minutes, sec
