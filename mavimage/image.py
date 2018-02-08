@@ -66,10 +66,10 @@ def gps_to_exif(gps_record):
         piexif.GPSIFD.GPSDateStamp,
         piexif.GPSIFD.GPSMapDatum
     }
-    gps_dict[piexif.GPSIFD.GPSLongitudeRef] = b'N' if gps_record.longitude >= 0 else b'S'
+    gps_dict[piexif.GPSIFD.GPSLongitudeRef] = b'E' if gps_record.longitude >= 0 else b'W'
     gps_dict[piexif.GPSIFD.GPSLongitude] = (
         tuple([float(x).as_integer_ratio() for x in deg2dms(gps_record.longitude)]))
-    gps_dict[piexif.GPSIFD.GPSLatitudeRef] = b'E' if gps_record.latitude >= 0 else b'W'
+    gps_dict[piexif.GPSIFD.GPSLatitudeRef] = b'N' if gps_record.latitude >= 0 else b'S'
     gps_dict[piexif.GPSIFD.GPSLatitude] = (
         tuple([float(x).as_integer_ratio() for x in deg2dms(gps_record.latitude)]))
     gps_dict[piexif.GPSIFD.GPSAltitudeRef] = 0 if gps_record.altitude >= 0 else 1
