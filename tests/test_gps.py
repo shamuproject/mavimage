@@ -21,7 +21,7 @@ def test_init(mocker):
     MockMav.push_handler.assert_called_with('GLOBAL_POSITION_INT', gps.global_position_int_handler)
 
 def test_record():
-    '''ensure message is retreived and atributes are stored'''
+    """ensure message is retrieved and attributes are stored"""
     mav = MockMav()
     gps = GPS(mav)
     message = MockMessage()
