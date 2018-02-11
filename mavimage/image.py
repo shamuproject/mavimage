@@ -21,7 +21,7 @@ class Image:
         self._gps = gps
 
     @classmethod
-    def from_bytes(image_bytes):
+    def from_bytes(cls, image_bytes):
         """construct image from bytes into format. bytes string. return Image"""
         """Turn into BytesIO"""
         stream = io.BytesIO(image_bytes)
@@ -38,8 +38,8 @@ class Image:
         """Create exif from given GPS record"""
         """open image and convert into bytesIO"""
         output = io.BytesIO()
-        self.save(output, given_format)
-        """Attach exif data"""
+        image = self.save(output, given_format)
+        return image
 
     def save(self, fp, format):
         """open file object(BytesIO))"""
@@ -50,22 +50,12 @@ class Image:
             inputIO.seek(0)
             byte_image = inputIO.read()
         piexif.insert(gps_bytes, byte_image, fp)
-        self._image.save(fp, format)
-
+        image = self._image.save(fp, format)
+        return image
 
 def gps_to_exif(gps_record):
     """gps_record: GPSRecord. Turn GPS record to exif"""
-    gps_dict = {
-        piexif.GPSIFD.GPSLongitudeRef,
-        piexif.GPSIFD.GPSLongitude,
-        piexif.GPSIFD.GPSLatitudeRef,
-        piexif.GPSIFD.GPSLatitude,
-        piexif.GPSIFD.GPSAltitudeRef,
-        piexif.GPSIFD.GPSAltitude,
-        piexif.GPSIFD.GPSTimeStamp,
-        piexif.GPSIFD.GPSDateStamp,
-        piexif.GPSIFD.GPSMapDatum
-    }
+    gps_dict = {}
     gps_dict[piexif.GPSIFD.GPSLongitudeRef] = b'E' if gps_record.longitude >= 0 else b'W'
     gps_dict[piexif.GPSIFD.GPSLongitude] = (
         tuple([float(x).as_integer_ratio() for x in deg2dms(gps_record.longitude)]))
