@@ -1,4 +1,3 @@
-from pymavlink import mavutil
 '''
 Photographer class. 
 Attributes: camera:Camera, image_sender:ImageSender, image_writer:ImageWriter

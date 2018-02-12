@@ -20,6 +20,3 @@ def test_from_bytes():
     new_image = Image(im, gps)
     image_bytes = new_image.to_bytes('WebP')
     image = new_image.from_bytes(image_bytes)
-
-
-

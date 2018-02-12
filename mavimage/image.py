@@ -32,7 +32,6 @@ class Image:
         """Transform into image of format with exif data"""
         return Image(image, gps)
 
-
     def to_bytes(self, given_format):
         """construct image to bytes from self.image (PIL.Image). bytes string. Save as BytesIO object"""
         """Create exif from given GPS record"""
@@ -41,16 +40,16 @@ class Image:
         image = self.save(output, given_format)
         return image
 
-    def save(self, fp, format):
+    def save(self, fp, given_format):
         """open file object(BytesIO))"""
         gps_dict = gps_to_exif(self._gps)
         gps_bytes = piexif.dump(gps_dict)
         with io.BytesIO() as inputIO:
-            self._image.save(inputIO, format)
+            self._image.save(inputIO, given_format)
             inputIO.seek(0)
-            byte_image = inputIO.read()
+            byte_image = inputIO.getvalue()
         piexif.insert(gps_bytes, byte_image, fp)
-        image = self._image.save(fp, format)
+        image = self._image.save(fp, given_format, exif=gps_bytes)
         return image
 
 def gps_to_exif(gps_record):
