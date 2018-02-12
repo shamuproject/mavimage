@@ -16,7 +16,7 @@ URL = 'https://github.com/shamuproject/mavimage'
 AUTHOR = 'Lauren McIntire'
 
 # What packages are required for this module to be executed?
-REQUIRED = ['Pillow', 'piexif']
+REQUIRED = ['Pillow', 'git+https://github.com/hMatoba/Piexif.git']
 
 here = os.path.abspath(os.path.dirname(__file__))
 
