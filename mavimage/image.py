@@ -73,7 +73,7 @@ def gps_to_exif(gps_record):
 def exif_to_gps(exif):
     """"exif: dict. Turn exif to GPS record"""
     all_exif = piexif.load(exif)
-    gps_exif = all_exif["GPS"]
+    gps_exif = all
     time = datetime.strptime(gps_exif[piexif.GPSIFD.GPSDateStamp], '%Y:%m:%d')
     time.replace(hour=gps_exif[piexif.GPSIFD.GPSTimeStamp[0][0]], minute=(
         gps_exif[piexif.GPSIFD.GPSTimeStamp[1][0]]), second=gps_exif[piexif.GPSIFD.GPSTimeStamp[1][0]])
