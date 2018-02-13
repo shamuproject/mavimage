@@ -38,6 +38,7 @@ class Image:
         open image and convert into bytesIO"""
         output = io.BytesIO()
         self.save(output, given_format)
+        output.seek(0)
         return output.read()
 
     def save(self, fp, given_format):
@@ -46,8 +47,8 @@ class Image:
         dict_whole = {"0th": {}, "Exif": {}, "GPS": gps_dict,
                       "Interop": {}, "thumbnail": None}
         exif_bytes = piexif.dump(dict_whole)
-        import pdb
-        pdb.set_trace()
+        #import pdb
+        #pdb.set_trace()
         self._image.save(fp, format=given_format, exif=exif_bytes)
 
 def gps_to_exif(gps_record):
@@ -72,8 +73,6 @@ def gps_to_exif(gps_record):
 def exif_to_gps(exif):
     """"exif: dict. Turn exif to GPS record"""
     gps_exif = piexif.load(exif)
-    #import pdb
-    #pdb.set_trace()
     gps_exif = gps_exif["GPS"]
     time = datetime.strptime(gps_exif[piexif.GPSIFD.GPSDateStamp].decode("utf-8"), '%Y:%m:%d')
     time.replace(hour=gps_exif[piexif.GPSIFD.GPSTimeStamp][0][0], minute=(
