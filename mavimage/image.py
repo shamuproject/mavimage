@@ -43,11 +43,16 @@ class Image:
     def save(self, fp, format):
         """open file object(BytesIO))"""
         gps_dict = gps_to_exif(self._gps)
-        gps_bytes = piexif.dump(gps_dict)
+        #gps_bytes = piexif.dump(exif_dict)
+        dict_whole = {b"0th": {}, b"Exif": {}, b"GPS": gps_dict,
+                      b"Interop": {}, b"thumbnail": {}}
         with io.BytesIO() as inputIO:
             self._image.save(inputIO, format)
             inputIO.seek(0)
-            byte_image = inputIO.getvalue()
+            byte_image = inputIO.read()
+        import pdb
+        pdb.set_trace()
+        gps_bytes = piexif.dump(dict_whole)
         piexif.insert(gps_bytes, byte_image, fp)
 
 def gps_to_exif(gps_record):
@@ -60,7 +65,7 @@ def gps_to_exif(gps_record):
     gps_dict[piexif.GPSIFD.GPSLatitude] = (
         tuple([float(x).as_integer_ratio() for x in deg2dms(gps_record.latitude)]))
     gps_dict[piexif.GPSIFD.GPSAltitudeRef] = 0 if gps_record.altitude >= 0 else 1
-    gps_dict[piexif.GPSIFD.GPSAltitude] = abs(gps_record.altitude)
+    gps_dict[piexif.GPSIFD.GPSAltitude] = float(abs(gps_record.altitude)).as_integer_ratio()
     gps_dict[piexif.GPSIFD.GPSMapDatum] = b'WGS-84'
     gps_dict[piexif.GPSIFD.GPSTimeStamp] = (
         tuple(float(x).as_integer_ratio() for x in (
@@ -71,9 +76,10 @@ def gps_to_exif(gps_record):
 
 def exif_to_gps(exif):
     """"exif: dict. Turn exif to GPS record"""
-    import pdb; pdb.set_trace()
     gps_exif = piexif.load(exif)
-    gps_exif = gps_exif["Exif"]
+    import pdb
+    pdb.set_trace()
+    gps_exif = gps_exif["GPS"]
     time = datetime.strptime(gps_exif[piexif.GPSIFD.GPSDateStamp], '%Y:%m:%d')
     time.replace(hour=gps_exif[piexif.GPSIFD.GPSTimeStamp[0][0]], minute=(
         gps_exif[piexif.GPSIFD.GPSTimeStamp[1][0]]), second=gps_exif[piexif.GPSIFD.GPSTimeStamp[1][0]])

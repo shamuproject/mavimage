@@ -13,21 +13,23 @@ def test_init():
     assert (new_image._image == im)
     assert (new_image._gps == gps)
 
-def test_to_bytes():
+"""def test_to_bytes():
     im = PIL.Image.new('L', (3, 3))
     time = datetime(1, 1, 1, 1, 1, 1)
-    gps = GPSRecord(time, 1, 1, 1)
+    gps = GPSRecord(time, 1, 1, 100)
     new_image = Image(im, gps)
     image_bytes = new_image.to_bytes('WebP')
     assert (type(image_bytes) == bytes)
-
+"""
 
 def test_from_bytes():
-    im = PIL.Image.new('L', (3, 3))
+    im = PIL.Image.new('L', (4, 4))
     time = datetime(1, 1, 1, 1, 1, 1)
-    gps = GPSRecord(time, 1, 1, 1)
+    gps = GPSRecord(time, 1000, 1000, 1000)
     new_image = Image(im, gps)
-    image_bytes = new_image.to_bytes('WebP')
+    #import pdb
+    #pdb.set_trace()
+    image_bytes = new_image.to_bytes('JPEG')
     image = new_image.from_bytes(image_bytes)
 
 
