@@ -22,21 +22,21 @@ class Image:
 
     @classmethod
     def from_bytes(cls, image_bytes):
-        """construct image from bytes into format. bytes string. return Image"""
-        """Turn into BytesIO"""
+        """construct image from bytes into format. bytes string. return Image
+        Turn into BytesIO
+        open the stream
+        Extract GPS data image_bytes and convert it to GPSRecord
+        Transform into image of format with exif data"""
         #stream = io.BytesIO(image_bytes)
-        """open the stream """
         image = PIL.Image.open(image_bytes)
-        """Extract GPS data image_bytes and convert it to GPSRecord"""
-        gps = exif_to_gps(image)
-        """Transform into image of format with exif data"""
+        gps = exif_to_gps(image.info["exif"])
         return Image(image, gps)
 
 
     def to_bytes(self, given_format):
-        """construct image to bytes from self.image (PIL.Image). bytes string. Save as BytesIO object"""
-        """Create exif from given GPS record"""
-        """open image and convert into bytesIO"""
+        """construct image to bytes from self.image (PIL.Image). bytes string. Save as BytesIO object
+        Create exif from given GPS record
+        open image and convert into bytesIO"""
         output = io.BytesIO()
         self.save(output, given_format)
         return output
@@ -72,8 +72,7 @@ def gps_to_exif(gps_record):
 
 def exif_to_gps(exif):
     """"exif: dict. Turn exif to GPS record"""
-    all_exif = piexif.load(exif)
-    gps_exif = all_exif["GPS"]
+    gps_exif = piexif.load(exif)
     time = datetime.strptime(gps_exif[piexif.GPSIFD.GPSDateStamp], '%Y:%m:%d')
     time.replace(hour=gps_exif[piexif.GPSIFD.GPSTimeStamp[0][0]], minute=(
         gps_exif[piexif.GPSIFD.GPSTimeStamp[1][0]]), second=gps_exif[piexif.GPSIFD.GPSTimeStamp[1][0]])
