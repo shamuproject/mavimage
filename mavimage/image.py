@@ -40,20 +40,15 @@ class Image:
         self.save(output, given_format)
         return output.read()
 
-    def save(self, fp, format):
+    def save(self, fp, given_format):
         """open file object(BytesIO))"""
         gps_dict = gps_to_exif(self._gps)
-        #gps_bytes = piexif.dump(exif_dict)
-        dict_whole = {b"0th": {}, b"Exif": {}, b"GPS": gps_dict,
-                      b"Interop": {}, b"thumbnail": {}}
-        with io.BytesIO() as inputIO:
-            self._image.save(inputIO, format)
-            inputIO.seek(0)
-            byte_image = inputIO.read()
+        dict_whole = {"0th": {}, "Exif": {}, "GPS": gps_dict,
+                      "Interop": {}, "thumbnail": None}
+        exif_bytes = piexif.dump(dict_whole)
         import pdb
         pdb.set_trace()
-        gps_bytes = piexif.dump(dict_whole)
-        piexif.insert(gps_bytes, byte_image, fp)
+        self._image.save(fp, format=given_format, exif=exif_bytes)
 
 def gps_to_exif(gps_record):
     """gps_record: GPSRecord. Turn GPS record to exif"""
@@ -77,12 +72,12 @@ def gps_to_exif(gps_record):
 def exif_to_gps(exif):
     """"exif: dict. Turn exif to GPS record"""
     gps_exif = piexif.load(exif)
-    import pdb
-    pdb.set_trace()
+    #import pdb
+    #pdb.set_trace()
     gps_exif = gps_exif["GPS"]
-    time = datetime.strptime(gps_exif[piexif.GPSIFD.GPSDateStamp], '%Y:%m:%d')
-    time.replace(hour=gps_exif[piexif.GPSIFD.GPSTimeStamp[0][0]], minute=(
-        gps_exif[piexif.GPSIFD.GPSTimeStamp[1][0]]), second=gps_exif[piexif.GPSIFD.GPSTimeStamp[1][0]])
+    time = datetime.strptime(gps_exif[piexif.GPSIFD.GPSDateStamp].decode("utf-8"), '%Y:%m:%d')
+    time.replace(hour=gps_exif[piexif.GPSIFD.GPSTimeStamp][0][0], minute=(
+        gps_exif[piexif.GPSIFD.GPSTimeStamp][1][0]), second=gps_exif[piexif.GPSIFD.GPSTimeStamp][1][0])
     sign_lat = -1 if gps_exif[piexif.GPSIFD.GPSLatitudeRef] == b'W' else 1
     latitude = sign_lat * dms2deg(gps_exif[piexif.GPSIFD.GPSLatitude][0][0]/gps_exif[piexif.GPSIFD.GPSLatitude][0][1],
                                   gps_exif[piexif.GPSIFD.GPSLatitude][1][0]/gps_exif[piexif.GPSIFD.GPSLatitude][1][1],

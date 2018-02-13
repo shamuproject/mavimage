@@ -29,8 +29,10 @@ def test_from_bytes():
     new_image = Image(im, gps)
     #import pdb
     #pdb.set_trace()
-    image_bytes = new_image.to_bytes('JPEG')
-    image = new_image.from_bytes(image_bytes)
+    image_bytes = new_image.to_bytes('jpeg')
+    image_from_byte = new_image.from_bytes(image_bytes)
+    assert(image_from_byte._image == new_image._image)
+    assert(image_from_byte._gps == new_image._gps)
 
 
 
