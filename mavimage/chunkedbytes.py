@@ -7,8 +7,10 @@ Attributes:
 
 class ChunkedBytes:
 
-    def __init__(self, bytes=None, chunk_size=256):
+    def __init__(self, bytes_item=None, chunk_size=256):
         # bytes: bytes, chunk_size: int
+        self.bytes_item = bytes_item
+        self.chunk_size = chunk_size
 
     def __getitem__(self, item):
         # item: bytes
@@ -19,11 +21,11 @@ class ChunkedBytes:
 
     def __delitem__(self, key):
         # key
+        del(self.bytes_item[key])
 
     def __len__(self):
-        length = 0
         # length: int
-        return length
+        return len(self.bytes_item)
 
     def __add__(self, other):
         # other: bytes or ChunkedBytes
