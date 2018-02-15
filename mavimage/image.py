@@ -1,9 +1,9 @@
 import PIL.Image
 import piexif
 import io
-import math
 from .gps import GPSRecord
 from datetime import datetime
+from fractions import Fraction
 
 """
 Image class.
@@ -53,17 +53,27 @@ def gps_to_exif(gps_record):
     """gps_record: GPSRecord. Turn GPS record to exif"""
     gps_dict = {}
     gps_dict[piexif.GPSIFD.GPSLongitudeRef] = b'E' if gps_record.longitude >= 0 else b'W'
-    gps_dict[piexif.GPSIFD.GPSLongitude] = (
-        tuple([float(x).as_integer_ratio() for x in deg2dms(abs(gps_record.longitude))]))
+    long_deg, long_min, long_sec = deg2dms(abs(gps_record.longitude))
+    gps_dict[piexif.GPSIFD.GPSLongitude] = ((Fraction(long_deg).limit_denominator().numerator,
+                                             Fraction(long_deg).limit_denominator().denominator),
+                                            (Fraction(long_min).limit_denominator().numerator,
+                                             Fraction(long_min).limit_denominator().denominator),
+                                            (Fraction(long_sec).limit_denominator().numerator,
+                                             Fraction(long_sec).limit_denominator().denominator))
     gps_dict[piexif.GPSIFD.GPSLatitudeRef] = b'N' if gps_record.latitude >= 0 else b'S'
-    gps_dict[piexif.GPSIFD.GPSLatitude] = (
-        tuple([float(x).as_integer_ratio() for x in deg2dms(abs(gps_record.latitude))]))
+    lat_deg, lat_min, lat_sec = deg2dms(abs(gps_record.latitude))
+    gps_dict[piexif.GPSIFD.GPSLatitude] = ((Fraction(lat_deg).limit_denominator().numerator,
+                                             Fraction(lat_deg).limit_denominator().denominator),
+                                            (Fraction(lat_min).limit_denominator().numerator,
+                                             Fraction(lat_min).limit_denominator().denominator),
+                                            (Fraction(lat_sec).limit_denominator().numerator,
+                                             Fraction(lat_sec).limit_denominator().denominator))
     gps_dict[piexif.GPSIFD.GPSAltitudeRef] = 0 if gps_record.altitude >= 0 else 1
-    gps_dict[piexif.GPSIFD.GPSAltitude] = float(abs(gps_record.altitude)).as_integer_ratio()
+    gps_dict[piexif.GPSIFD.GPSAltitude] = (int(abs(gps_record.altitude)), 1)
     gps_dict[piexif.GPSIFD.GPSMapDatum] = b'WGS-84'
-    gps_dict[piexif.GPSIFD.GPSTimeStamp] = (
-        tuple(float(x).as_integer_ratio() for x in (
-            [gps_record.time.hour, gps_record.time.minute, gps_record.time.second])))
+    gps_dict[piexif.GPSIFD.GPSTimeStamp] = ((gps_record.time.hour, 1), (gps_record.time.minute, 1),
+                                            (Fraction(gps_record.time.second).limit_denominator().numerator,
+                                             Fraction(gps_record.time.second).limit_denominator().denominator))
     gps_dict[piexif.GPSIFD.GPSDateStamp] = gps_record.time.strftime('%Y:%m:%d')
     return gps_dict
 
@@ -92,7 +102,7 @@ def exif_to_gps(exif):
 def deg2dms(degrees):
     deg = int(degrees)
     minutes = int((degrees-deg)*60)
-    sec = round(((((degrees - deg)*60)-minutes)*60), 4)
+    sec = round(((((degrees - deg)*60)-minutes)*60), 8)
     return deg, minutes, sec
 
 
