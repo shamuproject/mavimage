@@ -18,6 +18,7 @@ class ChunkedBytes:
 
     def __setitem__(self, key, value):
         # key, value
+        bytes_item[key] = value
 
     def __delitem__(self, key):
         # key
