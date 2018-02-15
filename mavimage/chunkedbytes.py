@@ -14,7 +14,8 @@ class ChunkedBytes:
 
     def __getitem__(self, item):
         # item: bytes
-        return item
+        item_index = self.bytes_item.index(item)
+        return item_index
 
     def __setitem__(self, key, value):
         # key, value
@@ -23,6 +24,7 @@ class ChunkedBytes:
     def __delitem__(self, key):
         # key
         del(self.bytes_item[key])
+
 
     def __len__(self):
         # length: int
