@@ -47,8 +47,6 @@ class Image:
         dict_whole = {"0th": {}, "Exif": {}, "GPS": gps_dict,
                       "Interop": {}, "thumbnail": None}
         exif_bytes = piexif.dump(dict_whole)
-        #import pdb
-        #pdb.set_trace()
         self._image.save(fp, format=given_format, exif=exif_bytes)
 
 def gps_to_exif(gps_record):
@@ -75,7 +73,7 @@ def exif_to_gps(exif):
     gps_exif = piexif.load(exif)
     gps_exif = gps_exif["GPS"]
     time = datetime.strptime(gps_exif[piexif.GPSIFD.GPSDateStamp].decode("utf-8"), '%Y:%m:%d')
-    time.replace(hour=gps_exif[piexif.GPSIFD.GPSTimeStamp][0][0], minute=(
+    time = time.replace(hour=gps_exif[piexif.GPSIFD.GPSTimeStamp][0][0], minute=(
         gps_exif[piexif.GPSIFD.GPSTimeStamp][1][0]), second=gps_exif[piexif.GPSIFD.GPSTimeStamp][1][0])
     sign_lat = -1 if gps_exif[piexif.GPSIFD.GPSLatitudeRef] == b'W' else 1
     latitude = sign_lat * dms2deg(gps_exif[piexif.GPSIFD.GPSLatitude][0][0]/gps_exif[piexif.GPSIFD.GPSLatitude][0][1],
@@ -86,7 +84,7 @@ def exif_to_gps(exif):
                                     gps_exif[piexif.GPSIFD.GPSLatitude][1][0]/gps_exif[piexif.GPSIFD.GPSLatitude][1][1],
                                     gps_exif[piexif.GPSIFD.GPSLatitude][2][0]/gps_exif[piexif.GPSIFD.GPSLatitude][2][1])
     sign_alt = 1 if gps_exif[piexif.GPSIFD.GPSAltitudeRef] == 0 else -1
-    altitude = sign_alt * gps_exif[piexif.GPSIFD.GPSAltitude]
+    altitude = sign_alt * gps_exif[piexif.GPSIFD.GPSAltitude][0]/gps_exif[piexif.GPSIFD.GPSAltitude][1]
     gps_record = GPSRecord(time, latitude, longitude, altitude)
     return gps_record
 

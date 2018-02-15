@@ -27,12 +27,13 @@ def test_from_bytes():
     time = datetime(1, 1, 1, 1, 1, 1)
     gps = GPSRecord(time, 1000, 1000, 1000)
     new_image = Image(im, gps)
-    #import pdb
-    #pdb.set_trace()
     image_bytes = new_image.to_bytes('jpeg')
     image_from_byte = new_image.from_bytes(image_bytes)
-    assert(image_from_byte._image == new_image._image)
-    assert(image_from_byte._gps == new_image._gps)
-
+    image_compare = image_from_byte.to_bytes('jpeg')
+    assert(image_bytes == image_compare)
+    assert(image_from_byte._gps.altitude == new_image._gps.altitude)
+    assert (image_from_byte._gps.longitude == new_image._gps.longitude)
+    assert (image_from_byte._gps.latitude == new_image._gps.latitude)
+    assert (image_from_byte._gps.time == new_image._gps.time)
 
 
