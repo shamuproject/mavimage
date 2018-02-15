@@ -54,10 +54,10 @@ def gps_to_exif(gps_record):
     gps_dict = {}
     gps_dict[piexif.GPSIFD.GPSLongitudeRef] = b'E' if gps_record.longitude >= 0 else b'W'
     gps_dict[piexif.GPSIFD.GPSLongitude] = (
-        tuple([float(x).as_integer_ratio() for x in deg2dms(gps_record.longitude)]))
+        tuple([float(x).as_integer_ratio() for x in deg2dms(abs(gps_record.longitude))]))
     gps_dict[piexif.GPSIFD.GPSLatitudeRef] = b'N' if gps_record.latitude >= 0 else b'S'
     gps_dict[piexif.GPSIFD.GPSLatitude] = (
-        tuple([float(x).as_integer_ratio() for x in deg2dms(gps_record.latitude)]))
+        tuple([float(x).as_integer_ratio() for x in deg2dms(abs(gps_record.latitude))]))
     gps_dict[piexif.GPSIFD.GPSAltitudeRef] = 0 if gps_record.altitude >= 0 else 1
     gps_dict[piexif.GPSIFD.GPSAltitude] = float(abs(gps_record.altitude)).as_integer_ratio()
     gps_dict[piexif.GPSIFD.GPSMapDatum] = b'WGS-84'
@@ -74,15 +74,15 @@ def exif_to_gps(exif):
     gps_exif = gps_exif["GPS"]
     time = datetime.strptime(gps_exif[piexif.GPSIFD.GPSDateStamp].decode("utf-8"), '%Y:%m:%d')
     time = time.replace(hour=gps_exif[piexif.GPSIFD.GPSTimeStamp][0][0], minute=(
-        gps_exif[piexif.GPSIFD.GPSTimeStamp][1][0]), second=gps_exif[piexif.GPSIFD.GPSTimeStamp][1][0])
-    sign_lat = -1 if gps_exif[piexif.GPSIFD.GPSLatitudeRef] == b'W' else 1
+        gps_exif[piexif.GPSIFD.GPSTimeStamp][1][0]), second=gps_exif[piexif.GPSIFD.GPSTimeStamp][2][0])
+    sign_lat = -1 if gps_exif[piexif.GPSIFD.GPSLatitudeRef] == b'S' else 1
     latitude = sign_lat * dms2deg(gps_exif[piexif.GPSIFD.GPSLatitude][0][0]/gps_exif[piexif.GPSIFD.GPSLatitude][0][1],
                                   gps_exif[piexif.GPSIFD.GPSLatitude][1][0]/gps_exif[piexif.GPSIFD.GPSLatitude][1][1],
                                   gps_exif[piexif.GPSIFD.GPSLatitude][2][0]/gps_exif[piexif.GPSIFD.GPSLatitude][2][1])
-    sign_long = -1 if gps_exif[piexif.GPSIFD.GPSLongitudeRef] == b'S' else 1
-    longitude = sign_long * dms2deg(gps_exif[piexif.GPSIFD.GPSLatitude][0][0]/gps_exif[piexif.GPSIFD.GPSLatitude][0][1],
-                                    gps_exif[piexif.GPSIFD.GPSLatitude][1][0]/gps_exif[piexif.GPSIFD.GPSLatitude][1][1],
-                                    gps_exif[piexif.GPSIFD.GPSLatitude][2][0]/gps_exif[piexif.GPSIFD.GPSLatitude][2][1])
+    sign_long = -1 if gps_exif[piexif.GPSIFD.GPSLongitudeRef] == b'W' else 1
+    longitude = sign_long * dms2deg(gps_exif[piexif.GPSIFD.GPSLongitude][0][0]/gps_exif[piexif.GPSIFD.GPSLongitude][0][1],
+                                    gps_exif[piexif.GPSIFD.GPSLongitude][1][0]/gps_exif[piexif.GPSIFD.GPSLongitude][1][1],
+                                    gps_exif[piexif.GPSIFD.GPSLongitude][2][0]/gps_exif[piexif.GPSIFD.GPSLongitude][2][1])
     sign_alt = 1 if gps_exif[piexif.GPSIFD.GPSAltitudeRef] == 0 else -1
     altitude = sign_alt * gps_exif[piexif.GPSIFD.GPSAltitude][0]/gps_exif[piexif.GPSIFD.GPSAltitude][1]
     gps_record = GPSRecord(time, latitude, longitude, altitude)
@@ -90,9 +90,9 @@ def exif_to_gps(exif):
 
 
 def deg2dms(degrees):
-    deg = int(abs(degrees))
+    deg = int(degrees)
     minutes = int((degrees-deg)*60)
-    sec = math.floor((((degrees - deg)*60)-minutes)*60)
+    sec = round(((((degrees - deg)*60)-minutes)*60), 4)
     return deg, minutes, sec
 
 
