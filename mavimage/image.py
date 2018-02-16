@@ -1,5 +1,7 @@
-"""Handle Image class and helper functions
-Lauren McIntire"""
+"""
+Handle Image class and helper functions
+Lauren McIntire
+"""
 
 from fractions import Fraction
 from datetime import datetime
@@ -10,55 +12,71 @@ from .gps import GPSRecord
 
 
 class Image:
-    """
-    Image class.
+    """Image class.
     Attributes:
-    image:PIL.Image
-    gps:GPSRecord
+        image:PIL.Image
+        gps:GPSRecord
     Manage combining images with GPS coordinates
-    can handle JPEG and WebP formats"""
+    can handle JPEG and WebP formats
+    """
 
     def __init__(self, image=None, gps=None):
-        """image: PIL.Image, gps:GPSRecord"""
+        """Initialize Image class
+        Args:
+           image: PIL.Image,
+           gps:GPSRecord
+        """
         self._image = image
         self._gps = gps
 
     @classmethod
     def from_bytes(cls, image_bytes):
-        """ Input: image_bytes: bytes object
-        Output: Image: Image class
-        construct image from bytes into format. bytes string. return Image
+        """construct image from bytes into format. bytes string. return Image
         Turn into BytesIO
         open the stream
         Extract GPS data image_bytes and convert it to GPSRecord
-        Transform into image of format with exif data"""
+        Transform into image of format with exif data
+        Args:
+             image_bytes: bytes object
+        Returns:
+             Image: Image class
+         """
         stream = io.BytesIO(image_bytes)
         image = PIL.Image.open(stream)
         gps = exif_to_gps(image.info.get('exif'))
         return Image(image, gps)
 
     def to_bytes(self, given_format):
-        """ Input: given_format: string
-        Output: bytes
-        construct image to bytes from self.image (PIL.Image). bytes string. Save as BytesIO object
+        """construct image to bytes from self.image (PIL.Image).
+        bytes string. Save as BytesIO object
         Create exif from given GPS record
-        open image and convert into bytesIO"""
+        open image and convert into bytesIO
+        Args:
+              given_format: string
+        Returns:
+                bytes
+        """
         output = io.BytesIO()
         self.save(output, given_format)
         output.seek(0)
         return output.read()
 
     def save(self, fp, given_format):
-        """Input: fp: BytesIO object, given_format: string
-        open file object(BytesIO)), insert exif bytes, and save to file pointer"""
+        """open file object(BytesIO)), insert exif bytes, and save to file pointer
+        Args:
+                  fp: BytesIO object,
+                  given_format: string
+        """
         gps_dict = gps_to_exif(self._gps)
-        exif_bytes = piexif.dump(gps_dict)
-        self._image.save(fp, format=given_format, exif=exif_bytes)
+        self._image.save(fp, format=given_format, exif=gps_dict)
 
 def gps_to_exif(gps_record):
-    """Input: gps_record: GPSRecord.
-    Output: dict_whole: dictionary with exif data
-    Turn GPS record to exif"""
+    """Turn GPS record to exif
+    Args:
+            gps_record: GPSRecord.
+    Returns:
+            dict_whole: dictionary with exif data
+    """
     gps_dict = {}
     gps_dict[piexif.GPSIFD.GPSLongitudeRef] = b'E' if gps_record.longitude >= 0 else b'W'
     long_deg, long_min, long_sec = deg2dms(abs(gps_record.longitude))
@@ -85,22 +103,29 @@ def gps_to_exif(gps_record):
     gps_dict[piexif.GPSIFD.GPSDateStamp] = gps_record.time.strftime('%Y:%m:%d')
     dict_whole = {"0th": {}, "Exif": {}, "GPS": gps_dict,
                   "Interop": {}, "thumbnail": None}
-    return dict_whole
+    exif_bytes = piexif.dump(dict_whole)
+    return exif_bytes
 
 
 def exif_to_gps(exif):
     """"Turn exif to GPS record
-    Input: exif: dict
-    Output: gps_record: GPSRecord"""
+    Args:
+           exif: dict
+    Returns:
+           gps_record: GPSRecord
+    """
     gps_exif = piexif.load(exif)
     gps_exif = gps_exif["GPS"]
     time = datetime.strptime(gps_exif[piexif.GPSIFD.GPSDateStamp].decode("utf-8"), '%Y:%m:%d')
     time = time.replace(hour=gps_exif[piexif.GPSIFD.GPSTimeStamp][0][0], minute=(
         gps_exif[piexif.GPSIFD.GPSTimeStamp][1][0]), second=gps_exif[piexif.GPSIFD.GPSTimeStamp][2][0])
     sign_lat = -1 if gps_exif[piexif.GPSIFD.GPSLatitudeRef] == b'S' else 1
-    latitude = sign_lat * dms2deg(gps_exif[piexif.GPSIFD.GPSLatitude][0][0]/gps_exif[piexif.GPSIFD.GPSLatitude][0][1],
-                                  gps_exif[piexif.GPSIFD.GPSLatitude][1][0]/gps_exif[piexif.GPSIFD.GPSLatitude][1][1],
-                                  gps_exif[piexif.GPSIFD.GPSLatitude][2][0]/gps_exif[piexif.GPSIFD.GPSLatitude][2][1])
+    latitude = sign_lat * dms2deg(gps_exif[piexif.GPSIFD.GPSLatitude][0][0] /
+                                  gps_exif[piexif.GPSIFD.GPSLatitude][0][1],
+                                  gps_exif[piexif.GPSIFD.GPSLatitude][1][0] /
+                                  gps_exif[piexif.GPSIFD.GPSLatitude][1][1],
+                                  gps_exif[piexif.GPSIFD.GPSLatitude][2][0] /
+                                  gps_exif[piexif.GPSIFD.GPSLatitude][2][1])
     sign_long = -1 if gps_exif[piexif.GPSIFD.GPSLongitudeRef] == b'W' else 1
     longitude = sign_long * dms2deg(gps_exif[piexif.GPSIFD.GPSLongitude][0][0] /
                                     gps_exif[piexif.GPSIFD.GPSLongitude][0][1],
@@ -116,17 +141,27 @@ def exif_to_gps(exif):
 
 def deg2dms(degrees):
     """Convert degrees to Degrees, Minutes, Seconds
-    Input: degrees
-    Output: deg(degrees), mins(degrees minutes), sec(degrees sec)"""
+    Args:
+          degrees
+    Returns:
+          deg(degrees),
+          mins(degrees minutes),
+          sec(degrees sec)
+    """
     deg = int(degrees)
     minutes = int((degrees-deg)*60)
-    sec = round(((((degrees - deg)*60)-minutes)*60), 8)
+    sec = round(((((degrees - deg)*60)-minutes)*60), 4)
     return deg, minutes, sec
 
 
 def dms2deg(deg, mins, sec):
     """Convert Degrees, Minutes, Seconds to degrees up to 8 decimal places
-    Input: deg(degrees), mins(degrees minutes), sec(degrees sec)
-    Output: degrees"""
+    Args:
+           deg(degrees),
+           mins(degrees minutes),
+           sec(degrees sec)
+    Returns:
+           degrees
+    """
     degree = round((sec/60+mins)/60+deg, 8)
     return degree
