@@ -4,4 +4,4 @@ pytest
 pytest-cov
 pytest-mock
 Pillow
-piexif
+git+https://github.com/hMatoba/Piexif.git
