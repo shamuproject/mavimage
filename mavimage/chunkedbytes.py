@@ -3,6 +3,7 @@ Takes
 """
 import numbers
 import math
+from collections import abc
 
 class ChunkedBytes:
     """ChunkedBytes class. Edit bytes arrays
@@ -53,10 +54,11 @@ class ChunkedBytes:
     def insert(self, index, chunk):
         # insert at index
         # chunks: bytes
-        save_chunks = self._bytes_item[index:]
-        self._bytes_item[index] = chunk
-        self._bytes_item[(index+1):] = save_chunks
+        save_chunks = self._bytes_item[(index*self._chunk_size):]
+        self._bytes_item[index*self._chunk_size] = chunk
+        self._bytes_item[((index+1)*self._chunk_size):] = save_chunks
 
     def flat(self):
         # value: bytes
-        return value
+        # return all bytes as one array
+        return self._bytes_item
