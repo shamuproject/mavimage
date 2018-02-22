@@ -41,15 +41,27 @@ class ChunkedBytes:
 
     def __add__(self, other):
         # other: bytes or ChunkedBytes
+        if isinstance(other, bytes):
+            self._bytes_item = self._bytes_item + other
+        else:
+            self._bytes_item = self._bytes_item + other._bytes_item
 
     def __radd__(self, other):
         # looks at left object to see if will work with object on right
         # if not, throw Error: NotImplemented
         # give thing on left to right to see if it will work
         # other: bytes or ChunkedBytes
+        if isinstance(other, bytes):
+            self._bytes_item = other + self._bytes_item
+        else:
+            self._bytes_item = other._bytes_item + self._bytes_item
 
     def zeros(self, chunks, chunk_size=256):
-        #chunks: int, chunk_size: int
+        # chunks: int, chunk_size: int
+        zero_array = []
+        for i in range(0, chunks):
+            zero_array.append(([0] * chunk_size))
+        return zero_array
 
     def insert(self, index, chunk):
         # insert at index
