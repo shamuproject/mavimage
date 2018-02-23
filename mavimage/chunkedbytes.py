@@ -1,9 +1,7 @@
-"""ChunkedBytes class.
-Takes
+"""ChunkedBytes class
 """
 import numbers
 import math
-from collections import abc
 
 class ChunkedBytes:
     """ChunkedBytes class. Edit bytes arrays
@@ -12,65 +10,111 @@ class ChunkedBytes:
         chunk_size: int
     """
     def __init__(self, bytes_item=None, chunk_size=256):
-        #bytes: bytes, chunk_size: int
+        """Initialize ChunkedBytes class
+        Args:
+            bytes: bytes
+            chunk_size: int
+        """
         self._bytes_item = bytes_item
         self._chunk_size = chunk_size
 
     def __getitem__(self, index):
-        #item: bytes
+        """Get item from ChunkedBytes. Raise exception if a tuple is given
+        Args:
+            index: int
+        Returns:
+            item: bytes
+            """
         if isinstance(index, numbers.Integral):
             item = self._bytes_item[index*self._chunk_size:
                                     (index*self._chunk_size+self._chunk_size)]
             return item
         else:
-            print("Error: Can only accept an integer value")
+            raise ValueError("Error: Can only accept an integer value")
 
     def __setitem__(self, key, byte_sequence):
-        # key: index, value: bytes
-        self._bytes_item[key*self._chunk_size:
-                        (key*self._chunk_size)+self._chunk_size] = byte_sequence
+        """set an item in the byte sequence
+        Args:
+            key: integer
+            byte_sequence: bytes
+        """
+        first_part = self._bytes_item[:(key*self._chunk_size)]
+        last_part = self._bytes_item[((key*self._chunk_size)+self._chunk_size):]
+        self._bytes_item = first_part + byte_sequence + last_part
 
     def __delitem__(self, key):
-        # key: index, bytes_sequence: bytes
-        del(self._bytes_item[(key*self._chunk_size):
-                                (key*self._chunk_size)+self._chunk_size])
+        """Delete a whole index of the of the ChunkedBytes based on chunk size
+        Args:
+            key: integer
+        """
+        first_part = self._bytes_item[:(key * self._chunk_size)]
+        last_part = self._bytes_item[((key * self._chunk_size) + self._chunk_size):]
+        self._bytes_item = first_part + last_part
 
     def __len__(self):
-        # length: int
+        """Find length of indeces of the bytes based on chunk size
+        Returns:
+            length: int
+        """
         return math.ceil(len(self._bytes_item)/self._chunk_size)
 
     def __add__(self, other):
-        # other: bytes or ChunkedBytes
+        """Add bytes or ChunkedBytes. Else raise a NotImplemented exception
+        Args:
+            other: bytes or ChunkedBytes
+        Returns:
+            bytes
+        """
         if isinstance(other, bytes):
             self._bytes_item = self._bytes_item + other
         else:
-            self._bytes_item = self._bytes_item + other._bytes_item
+            try:
+                self._bytes_item = self._bytes_item + other._bytes_item
+            except AttributeError:
+                raise NotImplementedError
+        return self._bytes_item
 
     def __radd__(self, other):
-        # looks at left object to see if will work with object on right
-        # if not, throw Error: NotImplemented
-        # give thing on left to right to see if it will work
-        # other: bytes or ChunkedBytes
+        """Add with bytes or ChunkedBytes on right of operator.
+        Else raise a NotImplemented exception
+        Args:
+            other: bytes or ChunkedBytes
+        Returns:
+            bytes
+            """
         if isinstance(other, bytes):
             self._bytes_item = other + self._bytes_item
         else:
-            self._bytes_item = other._bytes_item + self._bytes_item
+            try:
+                self._bytes_item = other._bytes_item + self._bytes_item
+            except AttributeError:
+                raise NotImplementedError
+        return self._bytes_item
 
     def zeros(self, chunks, chunk_size=256):
-        # chunks: int, chunk_size: int
-        zero_array = []
-        for i in range(0, chunks):
-            zero_array.append(([0] * chunk_size))
+        """Return zeros of length chunks*chunk_size
+        Args:
+             chunks: int
+             chunk_size: int
+        """
+        zero_array = b"0" * chunk_size
+        for i in range(0, chunks-1):
+            zero_array = zero_array + (b"0" * chunk_size)
         return zero_array
 
     def insert(self, index, chunk):
-        # insert at index
-        # chunks: bytes
-        save_chunks = self._bytes_item[(index*self._chunk_size):]
-        self._bytes_item[index*self._chunk_size] = chunk
-        self._bytes_item[((index+1)*self._chunk_size):] = save_chunks
+        """Insert chunks into bytes
+        Args:
+            index: int
+            chunk: bytes
+        """
+        first_part = self._bytes_item[:index*self._chunk_size]
+        last_part = self._bytes_item[self._chunk_size*index:]
+        self._bytes_item = first_part + chunk + last_part
 
     def flat(self):
-        # value: bytes
-        # return all bytes as one array
+        """Returns all bytes as one array
+        Returns:
+             bytes
+        """
         return self._bytes_item
