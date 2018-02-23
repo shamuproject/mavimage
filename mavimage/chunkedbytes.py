@@ -97,9 +97,9 @@ class ChunkedBytes:
              chunks: int
              chunk_size: int
         """
-        zero_array = b"0" * chunk_size
+        zero_array = 0x00 * chunk_size
         for i in range(0, chunks-1):
-            zero_array = zero_array + (b"0" * chunk_size)
+            zero_array = zero_array + (0x00 * chunk_size)
         return zero_array
 
     def insert(self, index, chunk):
