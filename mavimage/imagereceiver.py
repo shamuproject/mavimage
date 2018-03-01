@@ -1,5 +1,6 @@
 from multiprocessing import Lock
 from .chunkedbytes import ChunkedBytes
+from pymavlink import mavparm
 
 class ImageReceiver:
     """ImageReceiver class
@@ -24,7 +25,7 @@ class ImageReceiver:
             mavlink.push_handler('ENCAPSULATED_DATA', self.encapsulated_data_handler)
 
     def data_transmission_handshake_handler(self, mavlink, message):
-        # mavlink: MavLinkConnection, message: MAVLink_data_transmission_handshake_massge
+        # mavlink: MavLinkConnection, message: MAVLink_data_transmission_handshake_message
         self.total_size = message.size
         # may be unnecessary
         self.payload = message.payload
@@ -35,4 +36,11 @@ class ImageReceiver:
         # handle receiving encapsulated data bytes, put into chunkedbytes
         self._received_chunks.append(message.seqnr)
         self._image = self._image + message.data
+        if message.seqnr % 127 == 0:
+            self._data_ack_register(mavlink, self._received_chunks)
+
+    def _data_ack_register(self, mavlink, received):
+        for i in range(0, len(received)):
+            mavparm.MAVParmDict.mavset(mavlink, "DATA_ACK", received[i], 3)
+
 
