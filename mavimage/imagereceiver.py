@@ -10,9 +10,11 @@ Attributes:
 class ImageReceiver:
 
     def receive(self, mavlink, image):
+        pass
         # mavlink: MavLinkConnection, image:Image
 
     def register_handlers(self, mavlink):
+        pass
         # mavlink: MavLinkConnection
 
     def data_transmission_handshake_handler(self, mavlink, message):
