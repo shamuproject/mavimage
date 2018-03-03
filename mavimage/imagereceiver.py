@@ -1,6 +1,6 @@
 from multiprocessing import Lock
 from .chunkedbytes import ChunkedBytes
-from pymavlink import mavparm
+from pymavlink import mavutil
 
 class ImageReceiver:
     """ImageReceiver class
@@ -40,7 +40,6 @@ class ImageReceiver:
             self._data_ack_register(mavlink, self._received_chunks)
 
     def _data_ack_register(self, mavlink, received):
-        for i in range(0, len(received)):
-            mavparm.MAVParmDict.mavset(mavlink, "DATA_ACK", received[i], 3)
+        mavlink.mav.data_ack_send(127, received)
 
 
