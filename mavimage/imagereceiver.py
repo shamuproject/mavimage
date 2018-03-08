@@ -1,6 +1,5 @@
 from multiprocessing import Lock
 from .chunkedbytes import ChunkedBytes
-from pymavlink import mavutil
 
 
 class ImageReceiver:
@@ -18,6 +17,7 @@ class ImageReceiver:
     def receive(self, mavlink):
         # mavlink: MavLinkConnection, image:Image
         self.register_handlers(mavlink)
+        mavlink.send_data_transmission_handshake(type="WEBP", size=0, packets=0, payload=0)
 
     def register_handlers(self, mavlink):
         # mavlink: MavLinkConnection
@@ -40,10 +40,10 @@ class ImageReceiver:
             self._image._bytes_item = message.data
         else:
             self._image = self._image + message.data
-            if message.seqnr % 127 == 0:
-                self._data_ack_register(mavlink, self._received_chunks)
+        if message.seqnr % 127 == 0:
+            self._data_ack_register(mavlink, self._received_chunks)
 
     def _data_ack_register(self, mavlink, received):
-        mavlink.mav.data_ack_send(127, received)
+        mavlink.data_ack_send(127, received)
 
 
