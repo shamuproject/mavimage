@@ -11,7 +11,7 @@ class Message_DataTrans:
 class Message_EncapData:
     def __init__(self):
         self.seqnr = 0
-        self.data = []
+        self.data = b'abc'
 
 class MockMav:
     def push_handler(self, message, function):
@@ -27,8 +27,22 @@ def test_receive(mocker):
     test_receiver = ImageReceiver()
     mav = MockMav()
     test_receiver.receive(mav)
-    MockMav.push_handler.assert_called_with('DATA_TRANSMISSION_HANDSHAKE', test_receiver.data_transmission_handshake_handler)
+    #MockMav.push_handler.assert_called_with('DATA_TRANSMISSION_HANDSHAKE', test_receiver.data_transmission_handshake_handler)
     MockMav.push_handler.assert_called_with('ENCAPSULATED_DATA', test_receiver.encapsulated_data_handler)
 
+def test_data_transmission_handshake_handler():
+    mav = MockMav()
+    receiver = ImageReceiver()
+    message = Message_DataTrans()
+    receiver.data_transmission_handshake_handler(mav, message)
+    assert receiver.total_size == 253
+    assert receiver.payload == 253
+    assert receiver.packets == 1
 
-    
+def test_encapsulated_data_handler():
+    mav = MockMav()
+    receiver = ImageReceiver()
+    message = Message_EncapData()
+    receiver.encapsulated_data_handler(mav, message)
+    assert receiver._image.flat() == b'abc'
+    assert receiver._received_chunks == [0]
