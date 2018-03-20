@@ -21,7 +21,7 @@ class Message_EncapData3:
 
 class Message_EncapData2:
     def __init__(self):
-        self.seqnr = 127
+        self.seqnr = 2
         self.data = b'abc'
 
 class MockMav:
@@ -60,6 +60,9 @@ class MockMav:
         '''
         pass
 
+    def add_timer(self, period, function):
+        pass
+
 def test_init():
     test_receiver = ImageReceiver()
     assert test_receiver._received_chunks == []
@@ -85,30 +88,12 @@ def test_data_transmission_handshake_handler():
 def test_encapsulated_data_handler(mocker):
     mav = MockMav()
     receiver = ImageReceiver()
-    message = Message_EncapData()
-    receiver.encapsulated_data_handler(mav, message)
-    assert receiver._image.flat() == b'abc'
-    assert receiver._received_chunks == [0]
-    message2 = Message_EncapData3()
+    messageinfo = Message_DataTrans()
+    receiver.data_transmission_handshake_handler(mav, messageinfo)
+    message1 = Message_EncapData()
+    message2 = Message_EncapData2()
+    message3 = Message_EncapData3()
+    receiver.encapsulated_data_handler(mav, message1)
     receiver.encapsulated_data_handler(mav, message2)
-    assert receiver._image.flat() == b'abcabc'
-    assert receiver._received_chunks == [0, 1]
-
-    mav = MockMav()
-    mocker.patch.object(MockMav, 'data_ack_send')
-    message = Message_EncapData2()
-    receiver = ImageReceiver()
-    receiver.encapsulated_data_handler(mav, message)
-    assert receiver._image.flat() == b'abc'
-    assert receiver._received_chunks == [127]
-    MockMav.data_ack_send.assert_called_with(127, [127])
-
-    mav = MockMav()
-    receiver = ImageReceiver()
-    receiver.receive(mav)
-    assert "ENCAPSULATED_DATA" in mav.handlers
-    assert mav.handlers["ENCAPSULATED_DATA"] == receiver.encapsulated_data_handler
-    assert "DATA_TRANSMISSION_HANDSHAKE" in mav.handlers
-    assert mav.handlers["DATA_TRANSMISSION_HANDSHAKE"] == receiver.data_transmission_handshake_handler
-
+    receiver.encapsulated_data_handler(mav, message3)
 

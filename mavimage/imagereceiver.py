@@ -52,7 +52,7 @@ class ImageReceiver:
         sorted_received = sorted(received)
         missing = []
         j = 0
-        for i in range(1,self.packets):
+        for i in range(1, self.packets):
             if sorted_received[i-1] != j:
                 missing.append(received[i-1])
             else:
