@@ -1,5 +1,6 @@
 from multiprocessing import Lock
 from .chunkedbytes import ChunkedBytes
+from threading import Timer
 
 class ImageReceiver:
     """ImageReceiver class
@@ -41,21 +42,19 @@ class ImageReceiver:
 
         # timer for few seconds -- then send request for packets don't have
         # recursively erase received packets
-        mavlink.add_timer(5, self._data_ack)
         self._received_chunks.append(message.seqnr)
         if self._image.flat() == None:
             self._image._bytes_item = message.data
         else:
             self._image + message.data
+        timer = Timer(self._wait_time, self._data_ack(mavlink, self._received_chunks))
+        timer.start()
 
     def _data_ack(self, mavlink, received):
-        sorted_received = sorted(received)
         missing = []
-        j = 0
-        for i in range(1, self.packets):
-            if sorted_received[i-1] != j:
-                missing.append(received[i-1])
-            else:
-                j = j+1
+        for i in range(0, self.packets):
+            missing.append(i)
+        for i in range(0, self.packets):
+            if i in received:
+                missing.remove(i)
         mavlink.data_ack_send(len(missing), missing)
-
