@@ -1,44 +1,62 @@
+"""Test image receiver by having messages sent, not sent, and seeing how data request reacts
+"""
 from mavimage.imagereceiver import ImageReceiver
 import pytest
 from pytest_mock import mocker
 from unittest.mock import call
 import time
+import threading
 
 class Message_DataTrans:
+    """Define a test data transmission handshake
+    """
     def __init__(self):
         self.size = 253
         self.payload = 253
-        self.packets = 1
+        self.packets = 23
 
 class Message_DataTrans2:
+    """Define a test data transmission handshake that we will send messages with
+    """
     def __init__(self):
         self.size = 253
         self.payload = 253
         self.packets = 3
 
 class Message_EncapData:
+    """Test message1
+    """
     def __init__(self):
         self.seqnr = 0
         self.data = b'abc'
 
 class Message_EncapData2:
+    """Test message2
+    """
     def __init__(self):
         self.seqnr = 1
         self.data = b'abc'
 
 class Message_EncapData3:
+    """Test message3
+    """
     def __init__(self):
         self.seqnr = 2
-        self.data = b'abc'
+        self.data = b'abb'
 
 class MockMav:
+    """Mock the mav class to mock pushing handlers and calling a timer
+    for data requests
+    """
     def __init__(self):
         self.handlers = {}
 
     def push_handler(self, message, function):
         self.handlers[message] = function
 
-    def data_ack_send(self, packets, received):
+    def data_request_send(self, packets, received):
+        """Fake data_request_send
+        """
         self.push_handler("DATA_ACK", self.data_ack_send)
 
     def data_transmission_handshake_send(self, type, size, width, height, packets, payload, jpg_quality,
@@ -68,15 +86,29 @@ class MockMav:
         pass
 
     def add_timer(self, period, function):
+        """Add a fake timer using threading so the code continues running but calls
+        with the timer in the background
+        """
+        thread = threading.Thread(target=self.timer_helper, args=(period, function))
+        thread.daemon = True
+        thread.start()
+
+    def timer_helper(self, period, function):
+        """the actual timer
+        """
         time.sleep(period)
         function(self)
 
 def test_init():
+    """Test initialization
+    """
     test_receiver = ImageReceiver()
     assert test_receiver._received_chunks == []
     assert test_receiver._image._chunk_size == 253
 
 def test_receive(mocker):
+    """Test receive. Make sure handlers get pushed
+    """
     mocker.patch.object(MockMav, 'push_handler')
     test_receiver = ImageReceiver()
     mav = MockMav()
@@ -85,16 +117,21 @@ def test_receive(mocker):
     MockMav.push_handler.assert_has_calls(calls, any_order=True)
 
 def test_data_transmission_handshake_handler():
+    """Test receiving packet numbers from data transmission handshake
+    """
     mav = MockMav()
     receiver = ImageReceiver()
     message = Message_DataTrans()
     receiver.data_transmission_handshake_handler(mav, message)
     assert receiver.total_size == 253
     assert receiver.payload == 253
-    assert receiver.packets == 1
+    assert receiver.packets == 23
 
-def test_encapsulated_data_handler():
+def test_encapsulated_data_handler(mocker):
+    """Test receiving all packets and make sure data_request is not called
+    """
     mav = MockMav()
+    mocker.patch.object(MockMav, 'data_request_send')
     receiver = ImageReceiver()
     messageinfo = Message_DataTrans2()
     receiver.data_transmission_handshake_handler(mav, messageinfo)
@@ -104,14 +141,18 @@ def test_encapsulated_data_handler():
     receiver.encapsulated_data_handler(mav, message1)
     receiver.encapsulated_data_handler(mav, message2)
     receiver.encapsulated_data_handler(mav, message3)
-    assert receiver._image.flat() == b'abcabcabc'
+    assert receiver._image.flat() == b'abcabcabb'
     assert 0 in receiver._received_chunks
     assert 1 in receiver._received_chunks
     assert 2 in receiver._received_chunks
+    assert not MockMav.data_request_send.called, 'data_request_ send should not be called'
 
-def test_data_ack(mocker):
+def test_data_request(mocker):
+    """Testing receiving only one out of three packets. Has to wait 5 seconds to allow timer to catch up and
+    request the packets
+    """
     mav = MockMav()
-    mocker.patch.object(MockMav, 'data_ack_send')
+    mocker.patch.object(MockMav, 'data_request_send')
     receiver = ImageReceiver()
     messageinfo = Message_DataTrans2()
     receiver.data_transmission_handshake_handler(mav, messageinfo)
@@ -119,19 +160,30 @@ def test_data_ack(mocker):
     receiver.encapsulated_data_handler(mav, message1)
     assert receiver._image.flat() == b'abc'
     assert 0 in receiver._received_chunks
-    MockMav.data_ack_send.assert_called_with(2, [1,2])
+    time.sleep(5)
+    MockMav.data_request_send.assert_called_with(2, [1,2])
 
+def test_data_request_respond(mocker):
+    """Test sending two packets. Make sure the program requests the final packet
+    Send the final packet then make sure data_request is not called again
+    Make sure all packets received and placed in Image object
+    """
     mav = MockMav()
-    mocker.patch.object(MockMav, 'data_ack_send')
+    mocker.patch.object(MockMav, 'data_request_send')
     receiver = ImageReceiver()
     messageinfo = Message_DataTrans2()
     receiver.data_transmission_handshake_handler(mav, messageinfo)
     message1 = Message_EncapData()
     message2 = Message_EncapData2()
+    message3 = Message_EncapData3()
     receiver.encapsulated_data_handler(mav, message1)
     receiver.encapsulated_data_handler(mav, message2)
+    time.sleep(5)
     assert receiver.packets == 3
     assert receiver._image.flat() == b'abcabc'
     assert 0 in receiver._received_chunks
     assert 1 in receiver._received_chunks
-    MockMav.data_ack_send.assert_has_calls([call(1, [2]), call(2, [1,2])], any_order=True)
+    MockMav.data_request_send.assert_called_with(1, [2])
+    receiver.encapsulated_data_handler(mav, message3)
+    assert MockMav.data_request_send.call_count == 1
+    assert receiver._image.flat() == b'abcabcabb'
