@@ -2,7 +2,7 @@ from mavimage.imagereceiver import ImageReceiver
 import pytest
 from pytest_mock import mocker
 from unittest.mock import call
-
+import time
 
 class Message_DataTrans:
     def __init__(self):
@@ -66,6 +66,10 @@ class MockMav:
 
         """
         pass
+
+    def add_timer(self, period, function):
+        time.sleep(period)
+        function(self)
 
 def test_init():
     test_receiver = ImageReceiver()

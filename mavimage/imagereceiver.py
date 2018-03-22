@@ -1,6 +1,5 @@
 from multiprocessing import Lock
 from .chunkedbytes import ChunkedBytes
-from threading import Timer
 
 class ImageReceiver:
     """ImageReceiver class
@@ -47,14 +46,13 @@ class ImageReceiver:
             self._image._bytes_item = message.data
         else:
             self._image + message.data
-        timer = Timer(self._wait_time, self._data_ack(mavlink, self._received_chunks))
-        timer.start()
+        mavlink.add_timer(self._wait_time, self._data_ack)
 
-    def _data_ack(self, mavlink, received):
+    def _data_ack(self, mavlink):
         missing = []
         for i in range(0, self.packets):
             missing.append(i)
         for i in range(0, self.packets):
-            if i in received:
+            if i in self._received_chunks:
                 missing.remove(i)
         mavlink.data_ack_send(len(missing), missing)
