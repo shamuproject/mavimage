@@ -6,6 +6,11 @@ from pytest_mock import mocker
 from unittest.mock import call
 import time
 import threading
+from mavimage.gps import GPSRecord
+from mavimage.image import Image
+import PIL
+from datetime import datetime
+from mavimage.chunkedbytes import ChunkedBytes
 
 class Message_DataTrans:
     """Define a test data transmission handshake
@@ -22,6 +27,32 @@ class Message_DataTrans2:
         self.size = 253
         self.payload = 253
         self.packets = 3
+
+class Message_ImageTrans:
+    """Define a test data transmission handshake that we will send messages with
+    """
+    def __init__(self):
+        self.size = 253
+        self.payload = 253
+        self.packets = 2
+
+im = PIL.Image.new('L', (4, 4))
+date = datetime(2018, 2, 9, 13, 21, 30)
+gps = GPSRecord(date, -40, 100, -100)
+new_image = Image(im, gps)
+image_bytes = new_image.to_bytes('webp')
+chunk = ChunkedBytes(image_bytes)
+
+
+class Message_Image1:
+    def __init__(self):
+        self.seqnr = 0
+        self.data = chunk[0]
+
+class Message_Image2:
+    def __init__(self):
+        self.seqnr = 1
+        self.data = chunk[1]
 
 class Message_EncapData:
     """Test message1
@@ -187,3 +218,16 @@ def test_data_request_respond(mocker):
     receiver.encapsulated_data_handler(mav, message3)
     assert MockMav.data_request_send.call_count == 1
     assert receiver._image.flat() == b'abcabcabb'
+
+def test_send_image():
+    mav = MockMav()
+    receiver = ImageReceiver()
+    messageinfo = Message_ImageTrans()
+    message1 = Message_Image1()
+    message2 = Message_Image2()
+    receiver.data_transmission_handshake_handler(mav, messageinfo)
+    receiver.encapsulated_data_handler(mav, message1)
+    receiver.encapsulated_data_handler(mav, message2)
+    time.sleep(5)
+    assert receiver.packets == 2
+    assert receiver._image.flat() == image_bytes
