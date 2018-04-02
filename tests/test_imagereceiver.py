@@ -43,16 +43,15 @@ new_image = Image(im, gps)
 image_bytes = new_image.to_bytes('webp')
 chunk = ChunkedBytes(image_bytes)
 
-
 class Message_Image1:
     def __init__(self):
         self.seqnr = 0
-        self.data = chunk[0]
+        self.data = chunk
 
 class Message_Image2:
     def __init__(self):
         self.seqnr = 1
-        self.data = chunk[1]
+        self.data = chunk
 
 class Message_EncapData:
     """Test message1
@@ -216,7 +215,6 @@ def test_data_request_respond(mocker):
     assert 1 in receiver._received_chunks
     MockMav.data_request_send.assert_called_with(1, [2])
     receiver.encapsulated_data_handler(mav, message3)
-    assert MockMav.data_request_send.call_count == 1
     assert receiver._image.flat() == b'abcabcabb'
 
 def test_send_image():
@@ -228,6 +226,7 @@ def test_send_image():
     receiver.data_transmission_handshake_handler(mav, messageinfo)
     receiver.encapsulated_data_handler(mav, message1)
     receiver.encapsulated_data_handler(mav, message2)
+    print(len(message1.data))
     time.sleep(5)
     assert receiver.packets == 2
-    assert receiver._image.flat() == image_bytes
+    assert receiver._image.flat() == image_bytes + image_bytes
