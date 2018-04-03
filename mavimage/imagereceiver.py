@@ -34,7 +34,9 @@ class ImageReceiver:
             image: Image
         """
         self.register_handlers(mavlink)
-        mavlink.data_transmission_handshake_send(type="MAVLINK_DATA_STREAM_IMG_JPEG", size=0, width=0, height=0, packets=0, payload=0, jpg_quality=0, force_mavlink1=False)
+        mavlink.data_transmission_handshake_send(type="MAVLINK_DATA_STREAM_IMG_JPEG",
+                                                 size=0, width=0, height=0, packets=0,
+                                                 payload=0, jpg_quality=0, force_mavlink1=False)
 
     def register_handlers(self, mavlink):
         """Push handlers with a lock so that they're received
@@ -42,7 +44,8 @@ class ImageReceiver:
             mavlink: MavLinkConnection
         """
         with self._mutex:
-            mavlink.push_handler('DATA_TRANSMISSION_HANDSHAKE', self.data_transmission_handshake_handler)
+            mavlink.push_handler('DATA_TRANSMISSION_HANDSHAKE',
+                                 self.data_transmission_handshake_handler)
             mavlink.push_handler('ENCAPSULATED_DATA', self.encapsulated_data_handler)
 
     def data_transmission_handshake_handler(self, mavlink, message):
@@ -63,7 +66,7 @@ class ImageReceiver:
             message: MAVLink_encapsulated_data_message
         """
         self._received_chunks.append(message.seqnr)
-        if self._image.flat() == None:
+        if self._image.flat() is None:
             self._image._bytes_item = message.data
         else:
             self._image + message.data
@@ -80,5 +83,5 @@ class ImageReceiver:
         for i in range(0, self.packets):
             if i in self._received_chunks:
                 missing.remove(i)
-        if len(missing) > 0:
+        if missing:
             mavlink.data_request_send(len(missing), missing)

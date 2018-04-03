@@ -46,6 +46,8 @@ chunk = ChunkedBytes(image_bytes, math.ceil(len(image_bytes)/2))
 
 
 class Message_Image1:
+    """Make an image by setting chunk size to half of the image and sending the image in two pieces
+    """
     def __init__(self):
         self.seqnr = 0
         self.data = chunk[0]
@@ -220,7 +222,7 @@ def test_data_request_respond(mocker):
     assert receiver._image.flat() == b'abcabcabb'
 
 def test_send_image():
-    """Assert that can send an image
+    """Assert that can send an image. Check that the image sent in two chunks creates the full image
     """
     mav = MockMav()
     receiver = ImageReceiver()
