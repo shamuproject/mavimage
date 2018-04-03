@@ -11,6 +11,7 @@ from mavimage.image import Image
 import PIL
 from datetime import datetime
 from mavimage.chunkedbytes import ChunkedBytes
+import math
 
 class Message_DataTrans:
     """Define a test data transmission handshake
@@ -41,17 +42,18 @@ date = datetime(2018, 2, 9, 13, 21, 30)
 gps = GPSRecord(date, -40, 100, -100)
 new_image = Image(im, gps)
 image_bytes = new_image.to_bytes('webp')
-chunk = ChunkedBytes(image_bytes)
+chunk = ChunkedBytes(image_bytes, math.ceil(len(image_bytes)/2))
+
 
 class Message_Image1:
     def __init__(self):
         self.seqnr = 0
-        self.data = chunk
+        self.data = chunk[0]
 
 class Message_Image2:
     def __init__(self):
         self.seqnr = 1
-        self.data = chunk
+        self.data = chunk[1]
 
 class Message_EncapData:
     """Test message1
@@ -218,6 +220,8 @@ def test_data_request_respond(mocker):
     assert receiver._image.flat() == b'abcabcabb'
 
 def test_send_image():
+    """Assert that can send an image
+    """
     mav = MockMav()
     receiver = ImageReceiver()
     messageinfo = Message_ImageTrans()
@@ -226,7 +230,7 @@ def test_send_image():
     receiver.data_transmission_handshake_handler(mav, messageinfo)
     receiver.encapsulated_data_handler(mav, message1)
     receiver.encapsulated_data_handler(mav, message2)
-    print(len(message1.data))
     time.sleep(5)
     assert receiver.packets == 2
-    assert receiver._image.flat() == image_bytes + image_bytes
+    assert receiver._image.flat() == image_bytes
+
