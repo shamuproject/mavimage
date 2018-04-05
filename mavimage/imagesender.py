@@ -1,4 +1,4 @@
-import webp
+from threading import Lock
 '''
 ImageSender class
 Attributes:

@@ -4,8 +4,6 @@ from mavimage.imagereceiver import ImageReceiver
 import pytest
 from pytest_mock import mocker
 from unittest.mock import call
-import time
-import threading
 from mavimage.gps import GPSRecord
 from mavimage.image import Image
 import PIL
