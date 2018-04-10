@@ -1,14 +1,15 @@
+from .imagewriter import ImageWriter
 """
-ImageWriter class
+JPEGWriter class
 Attributes:
     path_format: str
 """
 
 
-class ImageWriter:
+class JPEGWriter(ImageWriter):
 
     def __init__(self, path_format):
-        self.path = path_format
+        super().__init__(path_format)
 
     def write(self, image):
         image.save(self.path, given_format="jpeg")
