@@ -17,7 +17,7 @@ class ImageSender:
         self._mutex = Lock()
 
     def send(self, mavlink, image):
-        # mavlink:MavLinkConnection, image:Image
+        # mavlink:MavLinkConnection, image:ChunkedBytes
         self.packets = len(image)
         self.size = len(image.flat())
         self._image = image
@@ -34,7 +34,7 @@ class ImageSender:
     def data_transmission_handshake_handler(self, mavlink, message):
         # mavlink:MavLinkConnection, message:MavLink_data_transmission_handshake_message
         mavlink.data_transmission_handshake_send(type="MAVLINK_DATA_STREAM_IMG_JPEG",
-                                                 size=self.size, message.width, message.height, packets=self.packets,
+                                                 size=self.size, width=message.width, height=message.height, packets=self.packets,
                                                  payload=253, jpg_quality=100, force_mavlink1=False)
 
     def data_request_handler(self, mavlink, message):

@@ -40,18 +40,10 @@ class MockMav:
         """
         pass
 
-    def encapsulated_data_send(self, seqnr, data, force_mavlink1=False):
-        """
-
-
-        seqnr                     : sequence number (starting with 0 on every transmission) (uint16_t)
-        data                      : image data bytes (uint8_t)
-
-        """
+    def encapsulated_data_send(self, number, bytes):
         pass
 
-
-def test_send():
+def test_send(mocker):
     im = PIL.Image.new('L', (4, 4))
     date = datetime(2018, 2, 9, 13, 21, 30)
     gps = GPSRecord(date, -40, 100, -100)
@@ -61,3 +53,29 @@ def test_send():
     image_sender = ImageSender()
     mav = MockMav()
     image_sender.send(mav, chunk)
+    assert image_sender.packets == len(chunk)
+    assert image_sender.size == len(image_bytes)
+    assert image_sender._image == chunk
+
+def test_actual_send(mocker):
+    im = PIL.Image.new('L', (4, 4))
+    date = datetime(2018, 2, 9, 13, 21, 30)
+    gps = GPSRecord(date, -40, 100, -100)
+    new_image = Image(im, gps)
+    image_bytes = new_image.to_bytes('webp')
+    chunk = ChunkedBytes(image_bytes, math.ceil(len(image_bytes) / 4))
+    sender = ImageSender()
+    mav = MockMav()
+    sender.send(mav, chunk)
+    missing = [0, 1, 2, 3]
+    class Message:
+        def __init__(self, arr):
+            self.missing = arr
+    message1 = Message(missing)
+    mocker.patch.object(MockMav, 'encapsulated_data_send')
+    sender.data_request_handler(mav, message1)
+    #MockMav.encapsulated_data_send.assert_called_with([(0, chunk[0]),
+    #                                                   (1, chunk[1]),
+    #                                                   (2, chunk[2]),
+    #                                                  (3, chunk[3])])
+    MockMav.encapsulated_data_send.assert_called_with(3, chunk[3])

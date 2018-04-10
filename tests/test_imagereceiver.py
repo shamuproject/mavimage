@@ -10,6 +10,8 @@ import PIL
 from datetime import datetime
 from mavimage.chunkedbytes import ChunkedBytes
 import math
+import threading
+import time
 
 class Message_DataTrans:
     """Define a test data transmission handshake
