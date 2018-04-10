@@ -34,7 +34,8 @@ class ImageSender:
     def data_transmission_handshake_handler(self, mavlink, message):
         # mavlink:MavLinkConnection, message:MavLink_data_transmission_handshake_message
         mavlink.data_transmission_handshake_send(type="MAVLINK_DATA_STREAM_IMG_JPEG",
-                                                 size=self.size, width=message.width, height=message.height, packets=self.packets,
+                                                 size=self.size, width=message.width, height=message.height,
+                                                 packets=self.packets,
                                                  payload=253, jpg_quality=100, force_mavlink1=False)
 
     def data_request_handler(self, mavlink, message):
@@ -45,3 +46,4 @@ class ImageSender:
     def _send_packets(self, mavlink, missing):
         for i in missing:
             mavlink.encapsulated_data_send(i, self._image[i])
+

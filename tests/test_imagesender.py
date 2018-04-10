@@ -67,15 +67,14 @@ def test_actual_send(mocker):
     sender = ImageSender()
     mav = MockMav()
     sender.send(mav, chunk)
-    missing = [0, 1, 2, 3]
+    missed = [0, 1, 2, 3]
     class Message:
         def __init__(self, arr):
             self.missing = arr
-    message1 = Message(missing)
+    message1 = Message(missed)
     mocker.patch.object(MockMav, 'encapsulated_data_send')
     sender.data_request_handler(mav, message1)
-    #MockMav.encapsulated_data_send.assert_called_with([(0, chunk[0]),
-    #                                                   (1, chunk[1]),
-    #                                                   (2, chunk[2]),
-    #                                                  (3, chunk[3])])
-    MockMav.encapsulated_data_send.assert_called_with(3, chunk[3])
+    MockMav.encapsulated_data_send.assert_has_calls([call(0, chunk[0]),
+                                                       call(1, chunk[1]),
+                                                       call(2, chunk[2]),
+                                                       call(3, chunk[3])])
