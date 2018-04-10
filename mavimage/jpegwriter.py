@@ -1,13 +1,14 @@
-'''
+"""
 ImageWriter class
 Attributes:
     path_format: str
-'''
+"""
+
 
 class ImageWriter:
 
     def __init__(self, path_format):
-        # path_format: str
+        self.path = path_format
 
     def write(self, image):
-        # image: Image
+        image.save(self.path, given_format="jpeg")

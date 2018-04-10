@@ -1,8 +1,7 @@
-from pymavlink import mavutil
-'''
+"""
 Photographer class. 
 Attributes: camera:Camera, image_sender:ImageSender, image_writer:ImageWriter
-'''
+"""
 
 class Photographer:
 
@@ -10,6 +9,7 @@ class Photographer:
         """camera: PiCamera, image_sender:ImageSender, image_writer:ImageWriter"""
         self.image_sender = image_sender
         self.camera = camera
+        self.writer = image_writer
 
     def register_handlers(self, mavlink):
         """Pass mavlink: MAVLinkConnection to call push_handler function"""
