@@ -14,4 +14,3 @@ class Developer:
     def request_image(self, mavlink):
         #mavlink: MAVLinkConnection
         # image: Image
-        return image
