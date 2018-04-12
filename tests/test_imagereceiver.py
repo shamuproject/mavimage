@@ -195,7 +195,7 @@ def test_data_request(mocker):
     assert receiver._image.flat() == b'abc'
     assert 0 in receiver._received_chunks
     time.sleep(5)
-    MockMav.data_request_send.assert_called_with(2, [1,2])
+    MockMav.data_request_send.assert_has_calls([call(2, [1,2])])
 
 def test_data_request_respond(mocker):
     """Test sending two packets. Make sure the program requests the final packet
@@ -211,13 +211,14 @@ def test_data_request_respond(mocker):
     message2 = Message_EncapData2()
     message3 = Message_EncapData3()
     receiver.encapsulated_data_handler(mav, message1)
+    time.sleep(5)
     receiver.encapsulated_data_handler(mav, message2)
     time.sleep(5)
     assert receiver.packets == 3
     assert receiver._image.flat() == b'abcabc'
     assert 0 in receiver._received_chunks
     assert 1 in receiver._received_chunks
-    MockMav.data_request_send.assert_called_with(1, [2])
+    MockMav.data_request_send.assert_has_calls([call(2, [1, 2]), call(1, [2])], any_order=True)
     receiver.encapsulated_data_handler(mav, message3)
     assert receiver._image.flat() == b'abcabcabb'
 
