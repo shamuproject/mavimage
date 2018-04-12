@@ -4,13 +4,13 @@ from .camera import Camera
 import io
 import time
 from PIL import Image
-'''
+"""
 Class RPI Camera to be inherited by class Camera
 Attributes: width
 height
 gps:GPS
 piCamera:PiCamera
-'''
+"""
 
 class RPiCamera(Camera):
 
