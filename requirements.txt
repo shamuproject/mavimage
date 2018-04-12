@@ -5,3 +5,4 @@ pytest-cov
 pytest-mock
 Pillow
 git+https://github.com/hMatoba/Piexif.git
+git+https://github.com/shamuproject/mavconn.git
