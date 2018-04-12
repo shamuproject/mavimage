@@ -10,4 +10,5 @@ Attributes:
 class ReceiverApp:
 
     def __init__(self, mavlink, developer, logger):
+        pass
         # mavlink:MavLinkConnection, developer:Developer, logger:Logger

@@ -24,6 +24,7 @@ class ImageSender:
         self.register_handlers(mavlink)
 
     def register_handlers(self, mavlink):
+        pass
         # mavlink:MavLinkConnection
         with self._mutex:
             mavlink.push_handler('DATA_TRANSMISSION_HANDSHAKE',
