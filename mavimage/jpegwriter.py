@@ -1,4 +1,5 @@
 from .imagewriter import ImageWriter
+
 """
 JPEGWriter class
 Attributes:
@@ -12,4 +13,6 @@ class JPEGWriter(ImageWriter):
         super().__init__(path_format)
 
     def write(self, image):
-        image.save(self.path, given_format="jpeg")
+        date = image._gps.time.strftime('%m-%d-%Y-%H-%M-%S')
+        name = '{}{}{}{}'.format(self.path, '/', date, '.jpeg')
+        image.save(name, given_format='jpeg')
