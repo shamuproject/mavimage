@@ -1,14 +1,15 @@
-'''
+"""
 Photographer class. 
 Attributes: camera:Camera, image_sender:ImageSender, image_writer:ImageWriter
-'''
+"""
 
 class Photographer:
 
     def __init__(self, camera, image_sender, image_writer=None):
         """camera: PiCamera, image_sender:ImageSender, image_writer:ImageWriter"""
-        self.image_sender = image_sender
+        self.sender = image_sender
         self.camera = camera
+        self.writer = image_writer
 
     def register_handlers(self, mavlink):
         """Pass mavlink: MAVLinkConnection to call push_handler function"""
@@ -16,7 +17,11 @@ class Photographer:
 
     def data_transmission_handshake_handler(self, mavlink, message):
         """mavlink:MavLinkConnection, message:str"""
-        pass
+        image = self.camera.take_picture()
+        self.sender.send(mavlink, image)
+
+
+
 
 
 
