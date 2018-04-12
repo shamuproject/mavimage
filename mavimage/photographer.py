@@ -19,6 +19,8 @@ class Photographer:
         """mavlink:MavLinkConnection, message:str"""
         image = self.camera.take_picture()
         self.sender.send(mavlink, image)
+        if self.writer:
+            self.writer.write(image)
 
 
 
