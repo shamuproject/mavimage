@@ -10,7 +10,7 @@ Welcome to MAVImage's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-
+   mavimage
 
 Indices and tables
 ==================
