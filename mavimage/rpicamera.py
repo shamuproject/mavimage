@@ -1,4 +1,4 @@
-#import picamera
+import picamera
 
 from .camera import Camera
 from .image import Image
@@ -15,8 +15,8 @@ class RPiCamera(Camera):
 
     def __init__(self, picamera, gps):
         # width, height, gps:GPS, picamera:PiCamera
-        #super().__init__(gps)
-        #self._picamera = picamera.PiCamera()
+        super().__init__(gps)
+        self._picamera = picamera.PiCamera()
         self.gps = gps
         pass
 
