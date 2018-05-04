@@ -1,23 +1,23 @@
-#import picamera
+import picamera
 
 from .camera import Camera
-import io
-import time
-from PIL import Image
-'''
+from .image import Image
+
+"""
 Class RPI Camera to be inherited by class Camera
 Attributes: width
 height
 gps:GPS
 piCamera:PiCamera
-'''
+"""
 
 class RPiCamera(Camera):
 
     def __init__(self, picamera, gps):
         # width, height, gps:GPS, picamera:PiCamera
-        #super().__init__(gps)
-        #self._picamera = picamera.PiCamera()
+        super().__init__(gps)
+        self._picamera = picamera.PiCamera()
+        self.gps = gps
         pass
 
     def take_picture(self):
@@ -29,4 +29,4 @@ class RPiCamera(Camera):
         #stream.seek(0)
         #image = Image.open(stream)
         #return image
-        pass
+        return Image(b'abc', self.gps)

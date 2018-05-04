@@ -11,6 +11,10 @@ class GPS:
             mavlink:MAVLinkConnection
         """
         self.register_handlers(mavlink)
+        self.altitude = 0
+        self.longitude = 0
+        self.latitude = 0
+        self.time = datetime.now()
 
     def register_handlers(self, mavlink):
         """Call push handler in mavlink with request for GLOBAL_POSITION_INT message
@@ -25,9 +29,9 @@ class GPS:
                mavlink:MAVLinkConnection,
                message:GLOBAL_POSITION_INT
         """
-        self.lat = float(message.lat)/10000000
-        self.lon = float(message.lon)/10000000
-        self.alt = float(message.alt)
+        self.latitude = float(message.lat)/10000000
+        self.longitude = float(message.lon)/10000000
+        self.altitude = float(message.alt)
         # find absolute time
         self.time = datetime.now()
         self.record()
@@ -38,9 +42,9 @@ class GPS:
                GPSRecord(time, lat, lon, alt): GPSRecord
         """
         time = self.time
-        latitude = self.lat
-        longitude = self.lon
-        altitude = self.alt
+        latitude = self.latitude
+        longitude = self.longitude
+        altitude = self.altitude
         return GPSRecord(time, latitude, longitude, altitude)
 
 
