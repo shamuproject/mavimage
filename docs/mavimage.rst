@@ -1,3 +1,6 @@
+mavimage
+========
+
 .. automodule:: mavimage.camera
     :members:
     :private-members:
